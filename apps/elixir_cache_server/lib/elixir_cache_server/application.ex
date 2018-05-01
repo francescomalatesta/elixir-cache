@@ -6,10 +6,11 @@ defmodule ElixirCacheServer.Application do
   use Application
 
   def start(_type, _args) do
-    # List all child processes to be supervised
+    port = String.to_integer(System.get_env("PORT") || raise "missing $PORT environment variable")
+
     children = [
-      # Starts a worker by calling: ElixirCacheServer.Worker.start_link(arg)
-      # {ElixirCacheServer.Worker, arg},
+      {Task.Supervisor, name: ElixirCacheServer.TaskSupervisor},
+      Supervisor.child_spec({Task, fn -> ElixirCacheServer.accept(port) end}, restart: :permanent)
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
